@@ -7,9 +7,9 @@
 class Dispatcher : public ThreadHolder<Dispatcher>
 {
 public:
-	Dispatcher();
+	Dispatcher() = default;
 
-	void threadMain();
+	void threadMainLoop();
 
 	void addTask(Task task);
 

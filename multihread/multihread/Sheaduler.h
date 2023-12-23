@@ -2,11 +2,17 @@
 
 #include"ThreadHolderBase.h"
 #include "Dispather.h"
+#include <queue>
 
 struct SheaduledTask
 {
 	Task task;
 	size_t timeout;
+};
+
+struct Compare
+{
+	bool operator()(const SheaduledTask l, const SheaduledTask r) const { return l.timeout > r.timeout; }
 };
 
 class Scheduler : public ThreadHolder<Scheduler>
@@ -16,7 +22,7 @@ public:
 
 	Scheduler(Dispatcher& dispather);
 
-	void threadMain();
+	void threadMainLoop();
 
 	void addSheaduledTask(TaskFunc taskFunc, size_t timeout);
 
@@ -27,7 +33,7 @@ private:
 	uint64_t getEpochTime();
 
 	std::mutex sheadulerMutex;
-	std::vector<SheaduledTask> sheaduledTasks;
+	std::priority_queue<SheaduledTask, std::vector<SheaduledTask>, Compare> sheaduledTasks;
 	Dispatcher& dispather;
 };
 

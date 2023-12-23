@@ -15,7 +15,7 @@ public:
 	ThreadHolder() {}
 	void start() {
 		setState(THREAD_STATE_RUNNING);
-		m_thread = std::thread(&Derived::threadMain, static_cast<Derived*>(this));
+		m_thread = std::thread(&Derived::threadMainLoop, static_cast<Derived*>(this));
 	}
 
 	void stop() {

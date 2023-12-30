@@ -1,75 +1,103 @@
 #pragma once
 
 #include <array>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <stdint.h>
 #include <string_view>
 
-using DataSize_t = uint32_t;
-constexpr DataSize_t NET_MESSAGE_BUFFER_SIZE = 1024 * 20; //20 Kib
+static constexpr std::size_t HEADER_LENGTH = 4;
+static constexpr std::size_t MAX_BODY_LENGTH = 1024 * 10;
+static constexpr std::size_t NETWORKMESSAGE_MAXSIZE = HEADER_LENGTH + MAX_BODY_LENGTH;
+static constexpr uint16_t INITIAL_BUFFER_POSITION = HEADER_LENGTH;
 
-struct MessageContent {
-	uint8_t* m_begin = nullptr;
-	DataSize_t m_size = 0;
-	MessageContent(uint8_t* begin, DataSize_t size);
-};
-
-class Message {
+class Message
+{
 public:
-	Message() = default;
-
-	~Message() = default;
-
-	void skipBytes(DataSize_t count);
-
-	void addByte(uint8_t value);
+	Message();
 
 	uint8_t getByte();
 
-	/*
+	uint8_t getPreviousByte();
 
-	SETTERS
-		void Message::addUint16(uint8_t value);
-		void Message::addUint32(uint8_t value);
-		void Message::addUint64(uint8_t value);
-		void Message::addInt16(uint8_t value);
-		void Message::addInt32(uint8_t value);
-		void Message::addInt64(uint8_t value);
+	std::string_view getString(uint16_t stringLen = 0);
+	// skips count unknown/unused bytes in an incoming message
+	void skipBytes(int16_t count) { info.position += count; }
 
-	GETTERS
-		uint16_t Message::getUint16();
-		uint32_t Message::addUint32();
-		uint64_t Message::addUint64();
-		int16_t Message::addInt16();
-		int32_t Message::addInt32();
-		int64_t Message::addInt64();
-	*/
+	// simply write functions for outgoing message
+	void addByte(uint8_t value);
 
 	void addString(std::string_view value);
 
-	std::string getString();
+	uint16_t getLength() const;
 
-	bool addBytes(const uint8_t* bytes, DataSize_t size);
+	void setLength(uint16_t newLength);
 
-	void reset();
+	uint16_t getBufferPosition() const;
 
-	bool setBufferPosition(DataSize_t pos);
+	bool setBufferPosition(uint16_t pos);
 
-	MessageContent getMessageInfo();
+	uint8_t* getBuffer();
 
-	std::array<uint8_t, NET_MESSAGE_BUFFER_SIZE> m_data = { 0 };
+	const uint8_t* getBuffer() const;
 
-	void setLenght(DataSize_t lenght);
-private:
-	bool canRead(DataSize_t size);
+	uint8_t* getBodyBuffer();
 
-	bool canAdd(DataSize_t size);
+	void writeMessageLength() { add_header(info.length); }
 
+	uint16_t getLengthFromHeader() const { return static_cast<uint16_t>(m_buffer[0] | m_buffer[1] << 8); }
+
+	template <typename T>
+	void add(T value)
+	{
+		if (!canAdd(sizeof(T))) {
+			return;
+		}
+
+		std::memcpy(m_buffer.data() + info.position, &value, sizeof(T));
+		info.position += sizeof(T);
+		info.length += sizeof(T);
+	}
+
+	template <typename T>
+	std::enable_if_t<std::is_trivially_copyable_v<T>, T> get() noexcept
+	{
+		static_assert(std::is_trivially_constructible_v<T>, "Destination type must be trivially constructible");
+
+		if (!canRead(sizeof(T))) {
+			return 0;
+		}
+
+		T value;
+		std::memcpy(&value, m_buffer.data() + info.position, sizeof(T));
+		info.position += sizeof(T);
+		return value;
+	}
+
+	void add_header(uint16_t value) { std::memcpy(m_buffer.data(), &value, sizeof(uint16_t)); }
+
+	void reset() { info = {}; }
+
+protected:
 	struct NetworkMessageInfo
 	{
-		DataSize_t length = 0;
-		DataSize_t position = 0;
+		uint16_t length = 0;
+		uint16_t position = HEADER_LENGTH;
 	};
 
-	NetworkMessageInfo m_info;
+	NetworkMessageInfo info;
 
+private:
+	bool canAdd(size_t size) const { return (size + info.position) < MAX_BODY_LENGTH; }
+
+	bool canRead(int32_t size)
+	{
+		if ((info.position + size) > (info.length + 8) || size >= (MAX_BODY_LENGTH - info.position)) {
+			return false;
+		}
+		return true;
+	}
+
+	std::array<uint8_t, HEADER_LENGTH + MAX_BODY_LENGTH> m_buffer{0};
 };

@@ -1,11 +1,31 @@
 #include "Message.h"
 
-#include <math.h>
-#include <iostream>
+Message::Message() {}
 
-void Message::skipBytes(DataSize_t count)
+uint8_t Message::getByte()
 {
-	m_info.position += count;
+	if (!canRead(1)) {
+		return 0;
+	}
+
+	return m_buffer[info.position++];
+}
+
+uint8_t Message::getPreviousByte() { return m_buffer[--info.position]; }
+
+std::string_view Message::getString(uint16_t stringLen)
+{
+	if (stringLen == 0) {
+		stringLen = get<uint16_t>();
+	}
+
+	if (!canRead(stringLen)) {
+		return {};
+	}
+
+	uint8_t* it = m_buffer.data() + info.position;
+	info.position += stringLen;
+	return {reinterpret_cast<char*>(it), stringLen};
 }
 
 void Message::addByte(uint8_t value)
@@ -14,106 +34,44 @@ void Message::addByte(uint8_t value)
 		return;
 	}
 
-	m_data[m_info.position++] = value;
-	m_info.length++;
+	m_buffer[info.position++] = value;
+	info.length++;
 }
 
-uint8_t Message::getByte()
+void Message::addString(std::string_view value)
 {
-	if (!canRead(1)) {
-		return 0;
+	uint16_t stringLen = static_cast<uint16_t>(value.size());
+	if (!canAdd(stringLen + 1) || stringLen > MAX_BODY_LENGTH / 8 - 4) {
+		return;
 	}
 
-	return m_data[m_info.position++];
+	add<uint16_t>(stringLen);
+	std::memcpy(m_buffer.data() + info.position, value.data(), stringLen);
+	info.position += stringLen;
+	info.length += stringLen;
 }
 
-void Message::reset()
-{
-	m_info = {};
-}
+uint16_t Message::getLength() const { return info.length; }
 
-bool Message::setBufferPosition(DataSize_t pos)
+void Message::setLength(uint16_t newLength) { info.length = newLength; }
+
+uint16_t Message::getBufferPosition() const { return info.position; }
+
+bool Message::setBufferPosition(uint16_t pos)
 {
-	if (pos < NET_MESSAGE_BUFFER_SIZE)
-	{
-		m_info.position = pos;
+	if (pos < NETWORKMESSAGE_MAXSIZE - INITIAL_BUFFER_POSITION) {
+		info.position = pos + INITIAL_BUFFER_POSITION;
 		return true;
 	}
 	return false;
 }
 
-void Message::addString(std::string_view value)
+uint8_t* Message::getBuffer() { return &m_buffer[0]; }
+
+const uint8_t* Message::getBuffer() const { return &m_buffer[0]; }
+
+uint8_t* Message::getBodyBuffer()
 {
-	DataSize_t stringLen = static_cast<DataSize_t>(value.size());
-	if (!canAdd(stringLen + sizeof(DataSize_t)))
-	{
-		return;
-	}
-	// adding string size
-	std::memcpy(m_data.data() + m_info.position, &stringLen, stringLen);
-	m_info.position += stringLen;
-	m_info.length += stringLen;
-
-	// adding string content
-	std::memcpy(m_data.data() + m_info.position, value.data(), stringLen);
-	m_info.position += stringLen;
-	m_info.length += stringLen;
-}
-
-std::string Message::getString()
-{
-	// reading string size
-	DataSize_t stringLen = 0;
-	std::memcpy(&stringLen, m_data.data() + m_info.position, sizeof(DataSize_t));
-
-	m_info.position += (sizeof(DataSize_t));
-
-	// reading string content
-	if (!canRead(stringLen)) {
-		return {};
-	}
-
-	uint8_t* data = m_data.data() + m_info.position;
-	m_info.position += stringLen;
-	return std::string(reinterpret_cast<char*>(data), stringLen);
-}
-
-bool Message::addBytes(const uint8_t* bytes, DataSize_t size)
-{
-	if (!canAdd(size)) {
-		return false;
-	}
-
-	std::memcpy(m_data.data() + m_info.position, bytes, size);
-	m_info.position += size;
-	m_info.length += size;
-	return true;
-}
-
-bool Message::canAdd(DataSize_t size) {
-	return (size + m_info.position) < NET_MESSAGE_BUFFER_SIZE;
-}
-
-void Message::setLenght(DataSize_t lenght)
-{
-	m_info.length = lenght;
-}
-
-bool Message::canRead(DataSize_t size)
-{
-	if ((m_info.position + size) > (m_info.length) || size >= (NET_MESSAGE_BUFFER_SIZE - m_info.position)) {
-		return false;
-	}
-	return true;
-}
-
-
-MessageContent Message::getMessageInfo()
-{
-	return  MessageContent(m_data.data(), m_info.length);
-}
-
-MessageContent::MessageContent(uint8_t* begin, DataSize_t size)
-	: m_begin(begin), m_size(size)
-{
+	info.position = sizeof(uint16_t);
+	return &m_buffer[HEADER_LENGTH];
 }

@@ -22,6 +22,8 @@ public:
 
 	static void handleTimeout(std::weak_ptr<TcpConnection> connectionWeak, const boost::system::error_code& error);
 
+	void close();
+
 private:
 	void readHeader();
 
@@ -35,5 +37,6 @@ private:
 	Message m_readMessage;
 	std::deque<std::shared_ptr<Message>> m_writeMessages;
 	boost::asio::io_service& m_io_service;
-	std::mutex m_mutex;
+	std::recursive_mutex m_mutex;
+	bool m_isCleaned = false;
 };

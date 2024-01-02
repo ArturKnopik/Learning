@@ -141,7 +141,7 @@
   <ItemGroup>
     <ClCompile Include="..\Shared\Message.cpp" />
     <ClCompile Include="ConnectionManager.cpp" />
-    <ClCompile Include="SV_main.cpp" />
+    <ClCompile Include="server_main.cpp" />
     <ClCompile Include="TcpConnection.cpp" />
     <ClCompile Include="TcpServer.cpp" />
   </ItemGroup>

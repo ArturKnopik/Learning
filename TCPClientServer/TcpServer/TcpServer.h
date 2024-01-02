@@ -5,7 +5,6 @@
 #include "boost/asio.hpp"
 
 #include <iostream>
-#include <set>
 
 class TcpServer
 {
@@ -18,6 +17,5 @@ private:
 	void accept();
 
 	boost::asio::ip::tcp::acceptor m_acceptor;
-	std::set<std::shared_ptr<TcpConnection>> m_connections;
 	boost::asio::io_service& m_io_service;
 };

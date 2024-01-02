@@ -32,8 +32,8 @@ private:
 	boost::asio::steady_timer m_readTimer;
 	boost::asio::steady_timer m_writeTimer;
 	boost::asio::ip::tcp::socket m_socket;
-	Message m_read_msg;
+	Message m_readMessage;
 	std::deque<std::shared_ptr<Message>> m_writeMessages;
 	boost::asio::io_service& m_io_service;
-	std::recursive_mutex m_mutex;
+	std::mutex m_mutex;
 };

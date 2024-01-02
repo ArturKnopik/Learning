@@ -137,7 +137,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Shared\Message.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="CL_main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Shared\Message.h" />

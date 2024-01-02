@@ -140,12 +140,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\Shared\Message.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="ConnectionManager.cpp" />
+    <ClCompile Include="SV_main.cpp" />
     <ClCompile Include="TcpConnection.cpp" />
     <ClCompile Include="TcpServer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Shared\Message.h" />
+    <ClInclude Include="ConnectionManager.h" />
     <ClInclude Include="TcpConnection.h" />
     <ClInclude Include="TcpServer.h" />
   </ItemGroup>

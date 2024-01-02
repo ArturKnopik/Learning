@@ -8,19 +8,22 @@ int main(int argc, char* argv[])
 
 		boost::asio::ip::tcp::endpoint endpoint(boost::asio::ip::tcp::v4(), 12345);
 		TcpServer server(io_context, endpoint);
-		/*
+		
 		std::thread thread([servers = &server]() {
-			while (1) {
-				std::string str = "Test server msg";
+			while (1 == 2) {
+				std::string str = "1234";
 				std::shared_ptr<Message> msg = std::make_unique<Message>();
+				msg->addByte('a');
+				msg->addByte('b');
+				msg->addByte('c');
 				msg->addString(str);
 				msg->writeMessageLength();
 				servers->broadcast(msg);
-				std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+				std::this_thread::sleep_for(std::chrono::milliseconds(30));
 			}
 		});
 		thread.detach();
-		*/
+		
 		io_context.run();
 	} catch (std::exception& e) {
 		std::cerr << "Exception: " << e.what() << "\n";

@@ -7,7 +7,7 @@
 #include <stdint.h>
 #include <string_view>
 
-static constexpr std::size_t HEADER_LENGTH = 4;
+static constexpr std::size_t HEADER_LENGTH = 2;
 static constexpr std::size_t MAX_BODY_LENGTH = 1024 * 10;
 static constexpr std::size_t NETWORKMESSAGE_MAXSIZE = HEADER_LENGTH + MAX_BODY_LENGTH;
 static constexpr uint16_t INITIAL_BUFFER_POSITION = HEADER_LENGTH;
@@ -77,7 +77,11 @@ public:
 
 	void add_header(uint16_t value) { std::memcpy(m_buffer.data(), &value, sizeof(uint16_t)); }
 
-	void reset() { info = {}; }
+	void reset()
+	{
+		m_buffer = std::array<uint8_t, HEADER_LENGTH + MAX_BODY_LENGTH>{0};
+		info = NetworkMessageInfo();
+	}
 
 protected:
 	struct NetworkMessageInfo

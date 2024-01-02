@@ -72,6 +72,6 @@ const uint8_t* Message::getBuffer() const { return &m_buffer[0]; }
 
 uint8_t* Message::getBodyBuffer()
 {
-	info.position = sizeof(uint16_t);
+	info.position = 2;
 	return &m_buffer[HEADER_LENGTH];
 }

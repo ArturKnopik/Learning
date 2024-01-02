@@ -9,35 +9,31 @@ constexpr uint8_t THREAD_SLEEP_TIME = 50;
 
 Scheduler::Scheduler(Dispatcher& dispatcher)
 	:dispather(dispatcher) {
-	sheaduledTasks.reserve(1000);
 }
 
 void Scheduler::stop()
 {
 	removeAllTasks();
-	//std::osyncstream(std::cout) << "Scheduler::stop(): stoping...\n";
 	ThreadHolder::stop();
 }
 
-void Scheduler::threadMain()
+void Scheduler::threadMainLoop()
 {
 	std::unique_lock<std::mutex> uniqueLock(sheadulerMutex, std::defer_lock);
 	while (getState() == ThreadState::THREAD_STATE_RUNNING)
 	{
 		std::this_thread::sleep_for(std::chrono::milliseconds(THREAD_SLEEP_TIME));
-		// remove expired task at the begining
 		uniqueLock.lock();
-		for (auto it = sheaduledTasks.begin(); it != sheaduledTasks.end();)
+		while (!sheaduledTasks.empty())
 		{
-			if (it->timeout < getEpochTime())
+			if (sheaduledTasks.top().timeout < getEpochTime())
 			{
-				//std::osyncstream(std::cout) << "Scheduler::threadMain(): moving task to dispatcher...\n";
-				dispather.addTask(std::move(it->task));
-				it = sheaduledTasks.erase(it);
+				dispather.addTask(std::move(sheaduledTasks.top().task));
+				sheaduledTasks.pop();
 			}
 			else
 			{
-				++it;
+				break;
 			}
 		}
 
@@ -48,7 +44,10 @@ void Scheduler::threadMain()
 void Scheduler::removeAllTasks()
 {
 	std::lock_guard<std::mutex> lock(sheadulerMutex);
-	sheaduledTasks.clear();
+	while (!sheaduledTasks.empty())
+	{
+		sheaduledTasks.pop();
+	}
 }
 
 void Scheduler::addSheaduledTask(TaskFunc taskFunc, size_t timeout)
@@ -58,8 +57,7 @@ void Scheduler::addSheaduledTask(TaskFunc taskFunc, size_t timeout)
 	{
 		return;
 	}
-	//std::osyncstream(std::cout) << "Scheduler::addSheaduledTask: adding task, current time" << getEpochTime() << ", timeout " << getEpochTime() + timeout << "\n";
-	sheaduledTasks.push_back(SheaduledTask(Task(std::move(taskFunc)), getEpochTime() + timeout));
+	sheaduledTasks.push(SheaduledTask(Task(std::move(taskFunc)), getEpochTime() + timeout));
 
 }
 

@@ -2,12 +2,8 @@
 #include <iostream>
 #include <syncstream>
 
-Dispatcher::Dispatcher()
-{
-	taskList.reserve(1000);
-}
 
-void Dispatcher::threadMain()
+void Dispatcher::threadMainLoop()
 {
 	std::vector<Task> taskListSwap;
 
@@ -24,9 +20,7 @@ void Dispatcher::threadMain()
 
 		std::swap(taskListSwap, taskList);
 		uniqueLock.unlock();
-
-		std::osyncstream(std::cout) << "Dispatcher::threadMain: executing tasks ::: " << taskListSwap.size() << "\n";
-
+		std::osyncstream(std::cout) << "Dispatcher::threadMain: executing "<< taskListSwap.size() << " tasks\n";
 		for (auto& task : taskListSwap)
 		{
 			task.execute();
@@ -42,7 +36,6 @@ void Dispatcher::addTask(Task task)
 	mutex.lock();
 	if (getState() == THREAD_STATE_RUNNING)
 	{
-		//std::osyncstream(std::cout) << "Dispatcher::addTask: adding task to list, id: " << task.getId() << "\n";
 		do_signal = taskList.empty();
 		taskList.push_back(std::move(task));
 		mutex.unlock();

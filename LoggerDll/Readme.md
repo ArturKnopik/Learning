@@ -1,7 +1,6 @@
 # LoggerDll
 
 It is a DLL library that provides a basic multi-threaded logger
-## Installation
 
 ## Usage
 

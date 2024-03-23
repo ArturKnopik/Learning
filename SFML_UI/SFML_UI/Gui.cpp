@@ -4,10 +4,15 @@
 
 KOD::GUI::Gui::Gui(sf::RenderWindow& window, KOD::GUI::Settings settings) : m_settings(settings), m_window(window)
 {
-	m_layout = std::make_unique<KOD::GUI::SimpleLayout>();
+	m_layout = std::make_unique<KOD::GUI::SimpleLayout>(window);
 }
 
-void KOD::GUI::Gui::handle(sf::Event& event) {}
+void KOD::GUI::Gui::handle(const sf::Event& event)
+{
+	if (m_layout) {
+		m_layout->handleEvent(event);
+	}
+}
 void KOD::GUI::Gui::draw() { m_layout->draw(m_window); }
 
 void KOD::GUI::Gui::addElement(std::unique_ptr<UiElement> element)
@@ -23,5 +28,12 @@ void KOD::GUI::Gui::addElement(std::unique_ptr<UiElement> element)
 
 	if (m_layout) {
 		m_layout->addUiElement(std::move(element));
+	}
+}
+
+void KOD::GUI::Gui::removeElement(size_t uid)
+{
+	if (m_layout) {
+		m_layout->removeUiElement(uid);
 	}
 }

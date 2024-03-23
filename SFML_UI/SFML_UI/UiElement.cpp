@@ -16,6 +16,8 @@ void KOD::GUI::UiElement::setSettings(KOD::GUI::Settings settings)
 
 void KOD::GUI::UiElement::draw(sf::RenderWindow &window) {}
 
+size_t KOD::GUI::UiElement::getUid() { return m_uid; }
+
 void KOD::GUI::UiElement::onMouseEnter() {}
 
 void KOD::GUI::UiElement::onMouseLeave() {}

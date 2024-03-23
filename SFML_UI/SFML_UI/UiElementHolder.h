@@ -12,7 +12,7 @@ class UiElementHolder
 public:
 	UiElementHolder();
 	void addUiElement(std::unique_ptr<KOD::GUI::UiElement> uiElement);
-	void removeUiElement(std::unique_ptr<KOD::GUI::UiElement> uiElement);
+	void removeUiElement(size_t uid);
 	std::vector<std::unique_ptr<KOD::GUI::UiElement>> &getUiElements();
 
 public:

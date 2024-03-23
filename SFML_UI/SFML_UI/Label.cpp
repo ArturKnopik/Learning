@@ -25,5 +25,4 @@ void KOD::GUI::Label::handleUpdateSettings()
 	m_text.setFont(m_settings.m_font);
 	m_text.setFillColor(m_settings.m_textColor);
 	m_text.setOutlineColor(m_settings.m_textColor);
-	m_text.setOutlineColor(m_settings.m_textColor);
 }

@@ -8,14 +8,13 @@
 namespace KOD {
 namespace GUI {
 
-using funcCallback = std::function<void()>;
-
 class UiElement
 {
 public:
 	UiElement();
 	void setSettings(KOD::GUI::Settings settings);
 	virtual void draw(sf::RenderWindow &window);
+	GUI_API size_t getUid();
 
 	virtual void onMouseEnter();
 	virtual void onMouseLeave();
@@ -34,6 +33,12 @@ private:
 	size_t m_uid = 0;
 
 	friend class KOD::GUI::Gui;
+};
+
+class UiElementCompareFunction
+{
+public:
+	bool operator()(UiElement element, size_t uid) const { return element.getUid() == uid; }
 };
 
 using UiElement_ptr = std::unique_ptr<KOD::GUI::UiElement>;

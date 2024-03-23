@@ -17,8 +17,10 @@ public:
 	GUI_API sf::Vector2f getPosition();
 	GUI_API void draw(sf::RenderWindow& window) override;
 
-private:
+protected:
 	void handleUpdateSettings() override;
+
+private:
 	sf::Text m_text;
 };
 

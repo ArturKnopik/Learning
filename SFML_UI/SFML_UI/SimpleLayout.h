@@ -8,12 +8,15 @@ namespace GUI {
 class SimpleLayout : public KOD::GUI::Layout_Base
 {
 public:
-	GUI_API SimpleLayout();
+	GUI_API SimpleLayout(const sf::RenderWindow& window);
 
-	GUI_API void handleEvent(sf::Event& event) override;
+	GUI_API void handleEvent(const sf::Event& event) override;
 	GUI_API void draw(sf::RenderWindow& window) override;
+	GUI_API void onMousePressed(float x, float y) override;
 
 private:
+	// for mouse position related to window
+	const sf::RenderWindow& m_window;
 };
 
 } // namespace GUI

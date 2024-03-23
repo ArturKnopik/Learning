@@ -6,7 +6,7 @@ KOD::GUI::Layout_Base::Layout_Base() {}
 
 KOD::GUI::Layout_Base::~Layout_Base() {}
 
-void KOD::GUI::Layout_Base::handleEvent(sf::Event& event) {}
+void KOD::GUI::Layout_Base::handleEvent(const sf::Event& event) {}
 
 void KOD::GUI::Layout_Base::draw(sf::RenderWindow& window) {}
 

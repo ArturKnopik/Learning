@@ -13,7 +13,7 @@ public:
 	GUI_API Layout_Base();
 	GUI_API virtual ~Layout_Base();
 
-	GUI_API virtual void handleEvent(sf::Event& event);
+	GUI_API virtual void handleEvent(const sf::Event& event);
 
 	GUI_API virtual void draw(sf::RenderWindow& window);
 	GUI_API virtual void onMouseEnter();

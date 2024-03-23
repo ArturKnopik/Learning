@@ -13,10 +13,10 @@ class Gui
 {
 public:
 	GUI_API Gui(sf::RenderWindow &window, KOD::GUI::Settings settings);
-	GUI_API void handle(sf::Event &event);
+	GUI_API void handle(const sf::Event &event);
 	GUI_API void draw();
 	GUI_API void addElement(std::unique_ptr<UiElement> element);
-	GUI_API void removeElement(std::unique_ptr<UiElement> element);
+	GUI_API void removeElement(size_t uid);
 
 private:
 	GUI_API Gui();
